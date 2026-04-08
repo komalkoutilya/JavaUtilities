@@ -25,3 +25,6 @@ replay_pid*
 
 # Intellij files
 .idea/
+
+# maven configuration files
+CommonUtils/.mvn/
