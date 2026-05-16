@@ -23,5 +23,8 @@
 hs_err_pid*
 replay_pid*
 
-# intelliJ config files
-.idea/*
+# Intellij files
+.idea/
+
+# maven configuration files
+CommonUtils/.mvn/

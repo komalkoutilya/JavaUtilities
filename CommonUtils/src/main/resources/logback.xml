@@ -2,8 +2,8 @@
 <configuration>
 
     <!-- Defines the folder and file name for your logs -->
-    <property name="LOG_DIR" value="logs" />
-    <property name="LOG_FILE" value="app.log" />
+    <property name="LOG_DIR" value="logs"/>
+    <property name="LOG_FILE" value="app.log"/>
 
     <!-- 1. Console Output (Prints to IntelliJ terminal) -->
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
@@ -23,8 +23,8 @@
 
     <!-- 3. Global logging level setting -->
     <root level="INFO">
-        <appender-ref ref="CONSOLE" />
-        <appender-ref ref="FILE" />
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
     </root>
 
 </configuration>
