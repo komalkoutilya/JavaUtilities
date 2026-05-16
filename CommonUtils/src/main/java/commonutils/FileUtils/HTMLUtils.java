@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.regex.Matcher;
@@ -20,6 +21,8 @@ public class HTMLUtils {
     private static final Logger logger = LoggerFactory.getLogger(HTMLUtils.class);
     private static final Properties htmlProperties = new Properties();
     private static final String HTML_TAG_PREFIX = "html.tag";
+    private static final String TAG_MATCHING_PATTERN = "<\\s*%1$s\\b[^>]*>(.*?)</\\s*%1$s\\s*>";
+    private static final String ATTRIBUTE_MATCHING_PATTERN = "<\\s*%1$s\\b[^>]*?\\b%2$s(?:\\s*=\\s*(?:(['\"])(.*?)\\3|([^>\\s]+)))?";
 
     static {
         try {
@@ -50,23 +53,39 @@ public class HTMLUtils {
     }
 
     /**
-     * Extracts the value of a specific attribute from a given HTML tag inside an HTML snippet.
+     * Extracts the inner HTML values/ content from specific HTML tag in an HTML snippet.
+     *
+     * @param htmlTag     name of HTML element whose inner HTML need to be extracted
+     * @param htmlSnippet raw HTML string containing target tag
+     * @return the list of extracted Inner HTM values/ content as {@code List<String>} if a match found, else an empty list is returned
+     */
+    public static List<String> getTagInnerContent(String htmlTag, String htmlSnippet) {
+        Pattern tagInnerContentPattern = Pattern.compile(String.format(TAG_MATCHING_PATTERN, htmlTag), Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        Matcher tagInnerContentMatcher = tagInnerContentPattern.matcher(htmlSnippet);
+        List<String> innerHTMLContentValues = new ArrayList<>();
+        while (tagInnerContentMatcher.find()) {
+            innerHTMLContentValues.add(tagInnerContentMatcher.group(1));
+        }
+        logger.info("list of tag content values - {}: {}", htmlTag, innerHTMLContentValues);
+        return innerHTMLContentValues;
+    }
+
+    /**
+     * Extracts the values of a specific attribute from all instances of given HTML tag in an HTML snippet.
      *
      * @param htmlTag     name of HTML element that contains the required attribute (eg: img, a)
      * @param attribute   name of the HTML element holding the required attribute, whose value needs to be extracted (eg: src, href)
      * @param htmlSnippet raw HTML string containing the target tag
-     * @return the extracted attribute value as {@code String} if a match is found;
-     * {@code null} if the tag or attribute does not exist in the snippet
+     * @return the list of extracted attribute value as {@code List<String>} if a match is found, else an empty list is returned
      */
-    public static String getAttributeValue(String htmlTag, String attribute, String htmlSnippet) {
-        Pattern tagPattern = Pattern.compile(String.format("<\\s*%s\\b[^>]*?\\b%s\\s*=\\s*(['\"])(.*?)\\1", htmlTag, attribute));
-        Matcher attributeMatcher = tagPattern.matcher(htmlSnippet);
-        if (attributeMatcher.find()) {
-            String attributeValue = attributeMatcher.group(2);
-            logger.info("'{}' attribute value of tag '{}' is: '{}'", attribute, htmlTag, attributeValue);
-            return attributeValue;
+    public static List<String> getAttributeValue(String htmlTag, String attribute, String htmlSnippet) {
+        Pattern attributePattern = Pattern.compile(String.format(ATTRIBUTE_MATCHING_PATTERN, htmlTag, attribute), Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        Matcher attributeMatcher = attributePattern.matcher(htmlSnippet);
+        List<String> attributeValues = new ArrayList<>();
+        while (attributeMatcher.find()) {
+            attributeValues.add(attributeMatcher.group(2));
         }
-        logger.error("'{}' attribute value not found for tag: '{}'", attribute, htmlTag);
-        return null;
+        logger.info("list of attribute values - {}: {}", attribute, attributeValues);
+        return attributeValues;
     }
 }
